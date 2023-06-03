@@ -11,11 +11,12 @@ jobs:
       - image: cimg/base:2022.08
     steps:
       - checkout
-      - run: # https://github.com/google/cadvisor/issues/1131
-          name: Update ca sertificate and ssl
-          command: |
-            apk add --update ca-certificates openssl \
-              && update-ca-certificates
+      # enable this when use image docker
+      # - run: # https://github.com/google/cadvisor/issues/1131
+      #     name: Update ca sertificate and ssl
+      #     command: |
+      #       apk add --update ca-certificates openssl \
+      #         && update-ca-certificates
       - run:
           name: Install hadolint
           command: |

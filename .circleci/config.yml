@@ -50,9 +50,10 @@ jobs:
     description: build docker image and push to ghcr.io
     working_directory: ~/app
     docker:
-      - image: docker:17.05.0-ce-git
+      - image: docker:24.0.2-alpine3.18
     steps:
       - checkout
+      - setup_remote_docker
       - run: ./build_push_image_karsajobs.sh
 
 workflows:

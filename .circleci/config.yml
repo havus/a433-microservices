@@ -50,7 +50,7 @@ jobs:
     description: build docker image and push to ghcr.io
     working_directory: ~/app
     docker:
-      - image: docker:18.06.3-ce-git
+      - image: docker:17.05.0-ce-git
     steps:
       - checkout
       - run: ./build_push_image_karsajobs.sh

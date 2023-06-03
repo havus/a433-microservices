@@ -6,9 +6,9 @@ version: 2.1
 
 jobs:
   lint_dockerfile:
+    working_directory: /home/app
     docker:
       - image: cimg/base:2023.06
-    working_directory: /app
     steps:
       - checkout
       - run: # https://github.com/google/cadvisor/issues/1131
@@ -47,6 +47,7 @@ jobs:
           command: go test -v -short --count=1 $(go list ./...)
   build_app_karsajobs:
     description: build docker image and push to ghcr.io
+    working_directory: /home/app
     docker:
       - image: cimg/base:2023.06
     steps:

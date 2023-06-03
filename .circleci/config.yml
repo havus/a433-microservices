@@ -12,9 +12,8 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker
-      - name: Update ca sertificate and ssl
-        description: https://github.com/google/cadvisor/issues/1131
-        run:
+      - run: # https://github.com/google/cadvisor/issues/1131
+          name: Update ca sertificate and ssl
           command: |
             apk add --update ca-certificates openssl \
               && update-ca-certificates

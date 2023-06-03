@@ -49,7 +49,7 @@ workflows:
   lint_test_build:
     jobs:
       - lint_dockerfile
-      - test_app
+      - test_app:
           requires:
             - lint_dockerfile
       # - build_app_karsajobs

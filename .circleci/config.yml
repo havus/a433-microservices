@@ -12,12 +12,12 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker
-      - run:
-          name: Update ca sertificate and ssl # https://github.com/google/cadvisor/issues/1131
+      - name: Update ca sertificate and ssl
+        description: https://github.com/google/cadvisor/issues/1131
+        run:
           command: |
             apk add --update ca-certificates openssl \
               && update-ca-certificates
-      # Install hadolint
       - run:
           name: Install hadolint
           command: |
@@ -27,6 +27,8 @@ jobs:
           name: Run hadolint
           command: /tmp/hadolint Dockerfile
   test_app:
+    description:
+      ref https://circleci.com/blog/continuous-integration-for-go-applications
     docker:
       - image: cimg/go:1.15.10
     working_directory: ~/repo

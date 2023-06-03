@@ -6,7 +6,7 @@ version: 2.1
 
 jobs:
   lint_dockerfile:
-    working_directory: /home/circleci/app/
+    working_directory: ~/app
     docker:
       - image: cimg/base:2022.08
     steps:
@@ -48,9 +48,9 @@ jobs:
           command: go test -v -short --count=1 $(go list ./...)
   build_app_karsajobs:
     description: build docker image and push to ghcr.io
-    working_directory: /home/circleci/app/
+    working_directory: ~/app
     docker:
-      - image: cimg/base:2022.08
+      - image: docker:24.0.2-alpine3.18
     steps:
       - checkout
       - run: ./build_push_image_karsajobs.sh

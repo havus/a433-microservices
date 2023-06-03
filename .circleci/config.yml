@@ -61,6 +61,6 @@ workflows:
       - test_app:
           requires:
             - lint_dockerfile
-      - build_app_karsajobs
+      - build_app_karsajobs:
           requires:
             - test_app

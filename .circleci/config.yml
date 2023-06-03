@@ -23,10 +23,9 @@ jobs:
           command: |
             wget -O /tmp/hadolint https://github.com/hadolint/hadolint/releases/download/v2.7.0/hadolint-Linux-x86_64
             chmod +x /tmp/hadolint
-            sudo mv /tmp/hadolint /usr/local/bin/
       - run:
           name: Run hadolint
-          command: hadolint Dockerfile
+          command: /tmp/hadolint Dockerfile
 
 workflows:
   lint_test_build:

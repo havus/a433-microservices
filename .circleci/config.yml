@@ -8,7 +8,8 @@ jobs:
   lint-dockerfile:
     working_directory: /app
     docker:
-      - image: hadolint/hadolint:v2.12.0-alpine
+      # - image: hadolint/hadolint:v2.12.0-alpine
+      - image: docker:17.05.0-ce-git
     steps:
       - checkout
       - setup_remote_docker

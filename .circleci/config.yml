@@ -8,11 +8,15 @@ jobs:
   lint-dockerfile:
     working_directory: /app
     docker:
-      # - image: hadolint/hadolint:v2.12.0-alpine
-      - image: docker:17.05.0-ce-git
+      - image: docker:17.05.0-ce-git # https://circleci.com/blog/how-to-build-a-docker-image-on-circleci-2-0/
     steps:
       - checkout
       - setup_remote_docker
+      - run:
+          name: Update ca sertificate and ssl # https://github.com/google/cadvisor/issues/1131
+          command: |
+            apk add --update ca-certificates openssl \
+              && update-ca-certificates
       # Install hadolint
       - run:
           name: Install hadolint

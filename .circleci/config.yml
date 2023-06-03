@@ -52,7 +52,8 @@ jobs:
       - image: docker:17.05.0-ce-git
     steps:
       - checkout
-      - setup_remote_docker
+      - setup_remote_docker:
+          version: 23.0.5
       - run: ./build_push_image_karsajobs.sh
 
 workflows:

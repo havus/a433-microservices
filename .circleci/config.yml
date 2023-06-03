@@ -7,7 +7,7 @@ version: 2.1
 jobs:
   lint_dockerfile:
     docker:
-      - image: cimg/base:2023.06
+      - image: docker:17.05.0-ce-git # https://circleci.com/blog/how-to-build-a-docker-image-on-circleci-2-0/
     working_directory: /app
     steps:
       - checkout
@@ -52,6 +52,7 @@ jobs:
       - image: docker:17.05.0-ce-git
     steps:
       - checkout
+      - setup_remote_docker
       - run: ./build_push_image_karsajobs.sh
 
 workflows:

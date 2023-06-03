@@ -1,14 +1,14 @@
 version: 2.1
 
-#  - lint-dockerfile berisi proses untuk menginstal hadolint dan menjalankannya terhadap berkas Dockerfile.
-#  - test-app berisi perintah untuk menjalankan unit test untuk backend dengan perintah: go test -v -short --count=1 $(go list ./...)
+#  - lint_dockerfile berisi proses untuk menginstal hadolint dan menjalankannya terhadap berkas Dockerfile.
+#  - test_app berisi perintah untuk menjalankan unit test untuk backend dengan perintah: go test -v -short --count=1 $(go list ./...)
 #  - build-app-karsajobs berisi perintah untuk build dan push image.
 
 jobs:
-  lint-dockerfile:
-    working_directory: /app
+  lint_dockerfile:
     docker:
       - image: docker:17.05.0-ce-git # https://circleci.com/blog/how-to-build-a-docker-image-on-circleci-2-0/
+    working_directory: /app
     steps:
       - checkout
       - setup_remote_docker
@@ -26,9 +26,33 @@ jobs:
       - run:
           name: Run hadolint
           command: /tmp/hadolint Dockerfile
+  test_app:
+    docker:
+      - image: cimg/go:1.15.10
+    working_directory: ~/repo
+    steps:
+      - restore_cache:
+          keys:
+            - go-mod-v4-{{ checksum "go.sum" }}
+      - run:
+          name: Install Dependencies
+          command: go get ./...
+      - save_cache:
+          key: go-mod-v4-{{ checksum "go.sum" }}
+          paths:
+            - "/go/pkg/mod"
+      - run:
+          name: Run tests
+          command: go test -v -short --count=1 $(go list ./...)
 
 workflows:
   lint_test_build:
     jobs:
-      - lint-dockerfile
+      - lint_dockerfile
+      - test_app
+          requires:
+            - lint_dockerfile
+      # - build_app_karsajobs
+      #     requires:
+      #       - test_app
 

@@ -1,0 +1,45 @@
+version: 2.1
+
+# lint-dockerfile berisi proses untuk menginstal hadolint dan menjalankannya terhadap berkas Dockerfile.
+# build-app-karsajobs-ui berisi perintah untuk build dan push image.
+
+jobs:
+  lint_dockerfile:
+    working_directory: ~/app
+    docker:
+      - image: cimg/base:2022.08
+    steps:
+      - checkout
+      # enable this when use image docker
+      # - run: # https://github.com/google/cadvisor/issues/1131
+      #     name: Update ca sertificate and ssl
+      #     command: |
+      #       apk add --update ca-certificates openssl \
+      #         && update-ca-certificates
+      - run:
+          name: Install hadolint
+          command: |
+            wget -O /tmp/hadolint https://github.com/hadolint/hadolint/releases/download/v2.7.0/hadolint-Linux-x86_64
+            chmod +x /tmp/hadolint
+      - run:
+          name: Run hadolint
+          command: /tmp/hadolint Dockerfile
+  build_app_karsajobs:
+    description: |
+      build docker image and push to ghcr.io
+      ref https://circleci.com/blog/how-to-build-a-docker-image-on-circleci-2-0/
+    working_directory: ~/app
+    docker:
+      - image: docker:24.0.2-alpine3.18
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run: ./build_push_image_karsajobs.sh
+
+workflows:
+  lint_build:
+    jobs:
+      - lint_dockerfile
+      - build_app_karsajobs:
+          requires:
+            - lint_dockerfile

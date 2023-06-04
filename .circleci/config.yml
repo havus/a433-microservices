@@ -34,7 +34,7 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker
-      - run: ./build_push_image_karsajobs.sh
+      - run: ./build_push_image_karsajobs_ui.sh
 
 workflows:
   lint_build:

@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongo # name of statefulset
+  labels:
+    app: mongo # label to track pod, so make sure this label is fullfilled on `spec.template.metadata.labels`
+spec:
+  selector:
+    matchLabels:
+      app: mongo # label to be tracked by statefulset
+  serviceName: mongo # service name
+  replicas: 1
+  minReadySeconds: 10
+  template:
+    metadata:
+      labels:
+        app: mongo # label
+    spec:
+      terminationGracePeriodSeconds: 10 # waiting time for pod to terminate all container, kubernetes will send SIGTERM to all container and after 10s to force with send SIGKILL to pod
+      containers:
+        - image: mongo:6.0 # image pull name
+          name: mongo
+          env: # env values
+            # ref: https://dilipkumar.medium.com/standalone-mongodb-on-kubernetes-cluster-19e7b5896b27
+            - name: MONGO_INITDB_ROOT_USERNAME_FILE
+              value: /etc/mongo-credentials/MONGO_ROOT_USERNAME
+            - name: MONGO_INITDB_ROOT_PASSWORD_FILE
+              value: /etc/mongo-credentials/MONGO_ROOT_PASSWORD
+          ports:
+            - containerPort: 27017 # export port from container
+              name: mongo
+          volumeMounts:
+            - name: mongo-persistent-storage # to store mongodb data
+              mountPath: /data/db
+            - name: mongo-config # to store mongodb configmap
+              mountPath: /etc/mongo
+            - name: mongo-secret
+              mountPath: /etc/mongo-credentials # to store mongodb cred user admin later
+              readOnly: true
+      volumes:
+        - name: mongo-persistent-storage # name of declared volumeMounts
+          persistentVolumeClaim:
+            claimName: mongo-pv-claim # pvc name
+        - name: mongo-config # name of declared volumeMounts
+          configMap: # use configmap value for this volumes
+            name: mongo-config
+            items:
+              - key: mongo.conf # key of configmap
+                path: mongod.conf # filename
+        - name: mongo-secret # name of declared volumeMounts
+          secret:
+            secretName: mongo-secret # secret name
+            items:
+            - key: MONGO_ROOT_USERNAME # key of secret
+              path: MONGO_ROOT_USERNAME # filename
+              mode: 0444 # mode rrr
+            - key: MONGO_ROOT_PASSWORD
+              path: MONGO_ROOT_PASSWORD
+              mode: 0444

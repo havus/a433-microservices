@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: karsajobsserver # set deployment name
+spec:
+  selector:
+    matchLabels:
+      app: karsajobsserver # label to track container, so make sure this label is fullfilled on `template.metadata.labels`
+  strategy:
+    type: Recreate # always re-create if there are new changes on this template
+  template:
+    metadata:
+      labels:
+        app: karsajobsserver # label to be tracked by deployment
+    spec:
+      containers:
+      - name: server # container prefix name
+        image: ghcr.io/havus/karsajobsserver:latest # image container
+        imagePullPolicy: IfNotPresent # will not pull image if image in minikube(cluster) is present
+        ports:
+          - containerPort: 8080 # export port from container
+        resources:
+          requests:
+            cpu: 70m # cpu minimum requirement
+        env: # set env's on container
+          - name: APP_PORT
+            value: '8080'
+          - name: MONGO_HOST
+            value: mongo
+          - name: MONGO_USER
+            valueFrom: # set env with object secret
+              secretKeyRef:
+                name: mongo-secret
+                key: MONGO_ROOT_USERNAME
+          - name: MONGO_PASS
+            valueFrom: # set env with object secret
+              secretKeyRef:
+                name: mongo-secret
+                key: MONGO_ROOT_PASSWORD

@@ -1,8 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: mongo-config # name of configmap
-data:
-  mongo.conf: | # `|` mark this value will be long values
-    storage:
-      dbPath: /data/db

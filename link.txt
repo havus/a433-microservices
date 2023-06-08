@@ -1,0 +1,8 @@
+
+Repo Link
+server: https://github.com/havus/a433-microservices/tree/karsajobs
+ui: https://github.com/havus/a433-microservices/tree/karsajobs-ui
+
+Packages Link
+server: https://github.com/users/havus/packages/container/package/karsajobsserver
+ui: https://github.com/users/havus/packages/container/package/karsajobsui

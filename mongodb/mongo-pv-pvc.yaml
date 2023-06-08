@@ -22,7 +22,7 @@ metadata:
 spec:
   storageClassName: manual # this configurated by user, not automatically by kubernetes
   accessModes:
-    - ReadWriteOnc # can NOT be accessed by more than 1 pod
+    - ReadWriteOnce # can NOT be accessed by more than 1 pod
   resources:
     requests:
       storage: 1Gi # size

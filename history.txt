@@ -1,0 +1,206 @@
+
+$ kubectl create ns monitoring
+
+$ helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+$ helm install my-prometheus prometheus-community/prometheus --version 22.6.2 --namespace monitoring
+NAME: my-prometheus
+LAST DEPLOYED: Fri Jun  2 04:00:27 2023
+NAMESPACE: monitoring
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+The Prometheus server can be accessed via port 80 on the following DNS name from within your cluster:
+my-prometheus-server.monitoring.svc.cluster.local
+
+
+Get the Prometheus server URL by running these commands in the same shell:
+  export POD_NAME=$(kubectl get pods --namespace monitoring -l "app=prometheus,component=server" -o jsonpath="{.items[0].metadata.name}")
+  kubectl --namespace monitoring port-forward $POD_NAME 9090
+
+
+The Prometheus alertmanager can be accessed via port  on the following DNS name from within your cluster:
+my-prometheus-%!s(<nil>).monitoring.svc.cluster.local
+
+
+Get the Alertmanager URL by running these commands in the same shell:
+  export POD_NAME=$(kubectl get pods --namespace monitoring -l "app=prometheus,component=" -o jsonpath="{.items[0].metadata.name}")
+  kubectl --namespace monitoring port-forward $POD_NAME 9093
+#################################################################################
+######   WARNING: Pod Security Policy has been disabled by default since    #####
+######            it deprecated after k8s 1.25+. use                        #####
+######            (index .Values "prometheus-node-exporter" "rbac"          #####
+###### .          "pspEnabled") with (index .Values                         #####
+######            "prometheus-node-exporter" "rbac" "pspAnnotations")       #####
+######            in case you still need it.                                #####
+#################################################################################
+
+
+The Prometheus PushGateway can be accessed via port 9091 on the following DNS name from within your cluster:
+my-prometheus-prometheus-pushgateway.monitoring.svc.cluster.local
+
+
+Get the PushGateway URL by running these commands in the same shell:
+  export POD_NAME=$(kubectl get pods --namespace monitoring -l "app=prometheus-pushgateway,component=pushgateway" -o jsonpath="{.items[0].metadata.name}")
+  kubectl --namespace monitoring port-forward $POD_NAME 9091
+
+For more information on running Prometheus, visit:
+https://prometheus.io/
+
+
+
+
+$ kubectl get all -n monitoring
+
+$ export PROMETHEUS_POD_NAME=$(kubectl get pods --namespace monitoring -l "app.kubernetes.io/component=server" -o jsonpath="{.items[0].metadata.name}")
+$ kubectl --namespace monitoring port-forward $PROMETHEUS_POD_NAME 9090
+
+
+
+$ helm repo add grafana https://grafana.github.io/helm-charts
+$ helm install my-grafana grafana/grafana --version 6.57.0 --namespace monitoring
+NAME: my-grafana
+LAST DEPLOYED: Fri Jun  2 04:28:03 2023
+NAMESPACE: monitoring
+STATUS: deployed
+REVISION: 1
+NOTES:
+1. Get your 'admin' user password by running:
+
+   kubectl get secret --namespace monitoring my-grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+
+
+2. The Grafana server can be accessed via port 80 on the following DNS name from within your cluster:
+
+   my-grafana.monitoring.svc.cluster.local
+
+   Get the Grafana URL to visit by running these commands in the same shell:
+     export POD_NAME=$(kubectl get pods --namespace monitoring -l "app.kubernetes.io/name=grafana,app.kubernetes.io/instance=my-grafana" -o jsonpath="{.items[0].metadata.name}")
+     kubectl --namespace monitoring port-forward $POD_NAME 3000
+
+3. Login with the password from step 1 and the username: admin
+#################################################################################
+######   WARNING: Persistence is disabled!!! You will lose your data when   #####
+######            the Grafana pod is terminated.                            #####
+#################################################################################
+
+
+$ export GRAFANA_POD_NAME=$(kubectl get pods --namespace monitoring -l "app.kubernetes.io/name=grafana,app.kubernetes.io/instance=my-grafana" -o jsonpath="{.items[0].metadata.name}")
+$ kubectl --namespace monitoring port-forward $GRAFANA_POD_NAME 3000
+
+# get password grafana
+$ kubectl get secret --namespace monitoring my-grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+
+$ helm repo add jenkinsci https://charts.jenkins.io
+$ helm install my-jenkins jenkinsci/jenkins --version 4.3.24 -n ci
+NAME: my-jenkins
+LAST DEPLOYED: Sat Jun  3 04:19:04 2023
+NAMESPACE: ci
+STATUS: deployed
+REVISION: 1
+NOTES:
+1. Get your 'admin' user password by running:
+  kubectl exec --namespace ci -it svc/my-jenkins -c jenkins -- /bin/cat /run/secrets/additional/chart-admin-password && echo
+2. Get the Jenkins URL to visit by running these commands in the same shell:
+  echo http://127.0.0.1:8080
+  kubectl --namespace ci port-forward svc/my-jenkins 8080:8080
+
+3. Login with the password from step 1 and the username: admin
+4. Configure security realm and authorization strategy
+5. Use Jenkins Configuration as Code by specifying configScripts in your values.yaml file, see documentation: http://127.0.0.1:8080/configuration-as-code and examples: https://github.com/jenkinsci/configuration-as-code-plugin/tree/master/demos
+
+For more information on running Jenkins on Kubernetes, visit:
+https://cloud.google.com/solutions/jenkins-on-container-engine
+
+For more information about Jenkins Configuration as Code, visit:
+https://jenkins.io/projects/jcasc/
+
+
+NOTE: Consider using a custom image with pre-installed plugins
+
+
+$ kubectl exec --namespace ci -it svc/my-jenkins -c jenkins -- /bin/cat /run/secrets/additional/chart-admin-password && echo
+7wNl1SVw2mybBIMRS0sq6c
+$ kubectl --namespace ci port-forward svc/my-jenkins 8080:8080
+$ helm show values jenkinsci/jenkins > jenkins/values.yaml
+
+
+# helm show values prometheus-community/prometheus > prometheus/values.yaml
+$ helm show chart prometheus-community/prometheus > prometheus/Chart.yaml
+$ helm upgrade my-prometheus prometheus-community/prometheus -n monitoring -f values.yaml
+
+
+# Prometheus: 9090
+# Grafana: 3000
+# Jenkins: 8080 - use circleci instead
+
+
+$ kubectl create ns karsajobs-ns
+$ kubectl apply -f mongodb/mongo-secret.yaml -n karsajobs-ns
+$ kubectl apply -f mongodb/mongo-service.yaml -n karsajobs-ns
+$ kubectl apply -f mongodb/mongo-configmap.yaml -n karsajobs-ns
+$ kubectl apply -f mongodb/mongo-pv-pvc.yaml -n karsajobs-ns
+$ kubectl apply -f mongodb/mongo-statefulset.yaml -n karsajobs-ns
+
+$ kubectl get all -n karsajobs-ns
+
+$ kubectl delete -f mongodb/mongo-secret.yaml -n karsajobs-ns
+$ kubectl delete -f mongodb/mongo-service.yaml -n karsajobs-ns
+$ kubectl delete -f mongodb/mongo-configmap.yaml -n karsajobs-ns
+$ kubectl delete -f mongodb/mongo-pv-pvc.yaml -n karsajobs-ns
+$ kubectl delete -f mongodb/mongo-statefulset.yaml -n karsajobs-ns
+
+$ kubectl apply -f mongo-statefulset_backup.yaml -n karsajobs-ns
+$ kubectl delete -f mongo-statefulset_backup.yaml -n karsajobs-ns
+
+$ docker run -d --name some-mongo mongo:6.0
+$ kubectl --namespace karsajobs-ns port-forward mongo-0 27017
+$ mongosh "mongodb://localhost:27017" --username admin
+
+------------ SERVER ------------
+
+$ kubectl apply -f backend/karsajobs-deployment.yaml -n karsajobs-ns
+$ kubectl apply -f backend/karsajobs-service.yaml -n karsajobs-ns
+$ kubectl logs -f karsajobsserver-6498fbbd67-fgvv9 -n karsajobs-ns
+
+$ kubectl get all -n karsajobs-ns
+
+$ kubectl delete -f backend/karsajobs-deployment.yaml -n karsajobs-ns
+$ kubectl delete -f backend/karsajobs-service.yaml -n karsajobs-ns
+
+$ kubectl describe service karsajobsserver -n karsajobs-ns
+
+================ FIX M1 Issue minikube ================
+$ kubectl --namespace karsajobs-ns port-forward svc/karsajobsserver 8080:8080
+--- OR ---
+https://stackoverflow.com/questions/72038418/cannot-connect-to-minikube-ipnode-port-on-mac-m1
+- https://levelup.gitconnected.com/minikube-tips-tricks-739f4b00ac17
+- https://stackoverflow.com/questions/71667587/apple-m1-minikube-no-service-url
+$ minikube service karsajobsserver --url -n karsajobs-ns
+http://127.0.0.1:61761
+
+------------ UI ------------
+
+$ kubectl apply -f frontend/karsajobs-ui-deployment.yaml -n karsajobs-ns
+$ kubectl apply -f frontend/karsajobs-ui-service.yaml -n karsajobs-ns
+
+$ kubectl describe service karsajobsui -n karsajobs-ns
+
+$ kubectl get all -n karsajobs-ns
+
+$ kubectl delete -f frontend/karsajobs-ui-deployment.yaml -n karsajobs-ns
+$ kubectl delete -f frontend/karsajobs-ui-service.yaml -n karsajobs-ns
+
+$ minikube image rm ghcr.io/havus/karsajobsui:latest
+$ kubectl --namespace karsajobs-ns port-forward svc/karsajobsui 8000:8000
+
+
+--------------------------------------------------------------------------------------------------
+$ kubectl create ns karsajobs-ns
+$ kubectl apply -f mongodb -n karsajobs-ns
+$ kubectl apply -f backend -n karsajobs-ns
+$ kubectl apply -f frontend -n karsajobs-ns
+$ kubectl get all -n karsajobs-ns
+$ kubectl --namespace karsajobs-ns port-forward svc/karsajobsserver 8080:8080
+$ kubectl --namespace karsajobs-ns port-forward svc/karsajobsui 8000:8000
+$ kubectl delete ns karsajobs-ns

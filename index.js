@@ -13,6 +13,7 @@ connectToQueue();
 
 async function connectToQueue() {
     try {
+        console.log(`Connecting to AMQP_URL: ${process.env.AMQP_URL}`);
         connection = await amqp.connect(amqpServer);
         channel = await connection.createChannel();
         await channel.assertQueue("order");

@@ -1,0 +1,116 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq
+spec:
+  type: NodePort
+  ports:
+    - name: amqp
+      port: 5672 # rabbitmq port
+    - name: management
+      port: 15672 # plugins
+  selector:
+    app: rabbitmq # grep pod label with key `app`
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: rabbitmq
+  labels:
+    account: rabbitmq
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: rabbitmq-data-pv # name of persistent volume
+  labels:
+    type: local # label pv
+    app: rabbitmq-data
+spec:
+  storageClassName: manual # this configurated by user, not automatically by kubernetes
+  capacity:
+    storage: 1Gi # size
+  accessModes:
+    - ReadWriteOnce # can NOT be accessed by more than 1 pvc
+  hostPath:
+    path: "/mnt/rabbitmq/data" # host path will be mounted
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: rabbitmq-data-pv-claim # name of persistent volume claim
+  labels:
+    app: rabbitmq-data # label pvc
+spec:
+  storageClassName: manual # this configurated by user, not automatically by kubernetes
+  accessModes:
+    - ReadWriteOnce # can NOT be accessed by more than 1 pod
+  resources:
+    requests:
+      storage: 1Gi # size
+  selector:
+    matchLabels:
+      app: rabbitmq-data
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: rabbitmq # name of statefulset
+  labels:
+    app: rabbitmq # label to track pod, so make sure this label is fullfilled on `spec.template.metadata.labels`
+    version: v1
+spec:
+  selector:
+    matchLabels:
+      app: rabbitmq # label to be tracked by statefulset
+  serviceName: rabbitmq # service name
+  replicas: 1
+  minReadySeconds: 10
+  template:
+    metadata:
+      labels:
+        app: rabbitmq # label
+        version: v1
+    spec:
+      terminationGracePeriodSeconds: 10 # waiting time for pod to terminate all container, kubernetes will send SIGTERM to all container and after 10s to force with send SIGKILL to pod
+      serviceAccountName: rabbitmq
+      containers:
+        - image: rabbitmq:3.11-management-alpine # image name
+          name: rabbitmq
+          ports:
+            - containerPort: 5672 # export port from container
+              name: amqp
+            - containerPort: 15672 # export port from container
+              name: management
+          volumeMounts:
+            - name: rabbitmq-data # to store rabbitmqdb data
+              mountPath: /var/lib/rabbitmq/
+          livenessProbe:
+            exec:
+              # This is just an example. There is no "one true health check" but rather
+              # several rabbitmq-diagnostics commands that can be combined to form increasingly comprehensive
+              # and intrusive health checks.
+              # Learn more at https://www.rabbitmq.com/monitoring.html#health-checks.
+              #
+              # Stage 2 check:
+              command: ["rabbitmq-diagnostics", "status"]
+            initialDelaySeconds: 60
+            # See https://www.rabbitmq.com/monitoring.html for monitoring frequency recommendations.
+            periodSeconds: 60
+            timeoutSeconds: 15
+          readinessProbe: # probe to know when RMQ is ready to accept traffic
+            exec:
+              # This is just an example. There is no "one true health check" but rather
+              # several rabbitmq-diagnostics commands that can be combined to form increasingly comprehensive
+              # and intrusive health checks.
+              # Learn more at https://www.rabbitmq.com/monitoring.html#health-checks.
+              #
+              # Stage 1 check:
+              command: ["rabbitmq-diagnostics", "ping"]
+            initialDelaySeconds: 20
+            periodSeconds: 60
+            timeoutSeconds: 10
+      volumes:
+        - name: rabbitmq-data # name of declared volumeMounts
+          persistentVolumeClaim:
+            claimName: rabbitmq-data-pv-claim # pvc name

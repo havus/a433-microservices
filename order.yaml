@@ -1,0 +1,83 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: order
+spec:
+  type: NodePort # type default ClusterIP is okay if we use port-forward, cause we need some issue on M1 with NodePort
+  ports:
+    - port: 3000 # grep pod port
+  selector:
+    app: order # grep pod label with key `app`
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: order
+  labels:
+    account: order
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-v1 # set deployment name
+  labels:
+    app: order
+    version: v1
+spec:
+  selector:
+    matchLabels:
+      app: order # label to track pod, so make sure this label is fullfilled on `template.metadata.labels`
+  strategy:
+    type: Recreate # always re-create if there are new changes on this template
+  template:
+    metadata:
+      labels:
+        app: order # label to be tracked by deployment
+        version: v1
+    spec:
+      serviceAccountName: order
+      containers:
+      - name: order # container prefix name
+        image: ghcr.io/havus/order:1.0 # image container
+        imagePullPolicy: IfNotPresent # will not pull image if image in minikube(cluster) is present
+        ports:
+          - containerPort: 3000 # export port from container
+        env:
+          - name: AMQP_URL
+            value: amqp://rabbitmq:5672
+        resources:
+          requests:
+            cpu: 200m # cpu minimum requirement
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-v2 # set deployment name
+  labels:
+    app: order
+    version: v2
+spec:
+  selector:
+    matchLabels:
+      app: order # label to track pod, so make sure this label is fullfilled on `template.metadata.labels`
+  strategy:
+    type: Recreate # always re-create if there are new changes on this template
+  template:
+    metadata:
+      labels:
+        app: order # label to be tracked by deployment
+        version: v2
+    spec:
+      serviceAccountName: order
+      containers:
+      - name: order # container prefix name
+        image: ghcr.io/havus/order:2.0 # image container
+        imagePullPolicy: IfNotPresent # will not pull image if image in minikube(cluster) is present
+        ports:
+          - containerPort: 3000 # export port from container
+        env:
+          - name: AMQP_URL
+            value: amqp://rabbitmq:5672
+        resources:
+          requests:
+            cpu: 200m # cpu minimum requirement

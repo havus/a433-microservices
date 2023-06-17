@@ -1,0 +1,28 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: order-gateway
+spec:
+  selector:
+    istio: ingressgateway # use istio default controller
+  servers:
+    - port:
+        number: 80 # expose port 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - "*" # allow from all host
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: order
+spec:
+  hosts:
+    - "*" # from all host
+  gateways:
+    - order-gateway
+  http:
+    - route:
+      - destination:
+          host: order # routing to order service

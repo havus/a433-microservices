@@ -13,9 +13,10 @@ var channel, connection;
 connectToQueue();
 
 async function connectToQueue() {
-    connection = await amqp.connect(amqpServer);
-    channel = await connection.createChannel();
     try {
+        console.log(`Connecting to AMQP_URL: ${process.env.AMQP_URL}`);
+        connection = await amqp.connect(amqpServer);
+        channel = await connection.createChannel();
         const queue = "order";
         await channel.assertQueue(queue);
         console.log("Connected to the queue!")
@@ -33,7 +34,7 @@ app.post("/order", (req, res) => {
 const createOrder = async order => {
     const queue = "order";
     await channel.sendToQueue(queue, Buffer.from(JSON.stringify(order)));
-    console.log("Order succesfully created!")
+    console.log("Order v2 succesfully created!")
     process.once('SIGINT', async () => { 
         console.log('got sigint, closing connection');
         await channel.close();

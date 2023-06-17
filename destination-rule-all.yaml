@@ -5,9 +5,9 @@ metadata:
 spec:
   host: order
   subsets:
-  - name: v1
+  - name: v1 # subset name v1 are pods with label version v1
     labels:
       version: v1
-  - name: v2
+  - name: v2 # subset name v2 are pods with label version v2
     labels:
       version: v2

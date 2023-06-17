@@ -21,7 +21,7 @@ spec:
   hosts:
     - "*" # from all host
   gateways:
-    - order-gateway
+    - order-gateway # gateway came from
   http:
     - route:
       - destination:

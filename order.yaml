@@ -12,7 +12,7 @@ spec:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: order
+  name: order # service account name order
   labels:
     account: order
 ---

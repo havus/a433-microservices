@@ -15,7 +15,7 @@ spec:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: rabbitmq
+  name: rabbitmq # service account name rabbitmq
   labels:
     account: rabbitmq
 ---

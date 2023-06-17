@@ -12,7 +12,7 @@ spec:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: shipping
+  name: shipping # service account name shipping
   labels:
     account: shipping
 ---

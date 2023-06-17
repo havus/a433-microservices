@@ -8,7 +8,10 @@ spec:
   gateways:
     - order-gateway # gateway came from
   http:
-    - route:
-      - destination:
-          host: order # routing to order service v2
-          subset: v2
+    - match:
+        - uri:
+            exact: /order
+      route:
+        - destination:
+            host: order # routing to order service v2
+            subset: v2

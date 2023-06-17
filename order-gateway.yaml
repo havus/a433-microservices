@@ -23,6 +23,9 @@ spec:
   gateways:
     - order-gateway # gateway came from
   http:
-    - route:
-      - destination:
-          host: order # routing to order service
+    - match:
+        - uri:
+            exact: /order
+      route:
+        - destination:
+            host: order # routing to order service

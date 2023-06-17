@@ -8,12 +8,15 @@ spec:
   gateways:
     - order-gateway # gateway came from
   http:
-    - route:
-      - destination:
-          host: order
-          subset: v1
-        weight: 90 # v1 with percentage 90%
-      - destination:
-          host: order
-          subset: v2
-        weight: 10 # v2 with percentage 10%
+    - match:
+        - uri:
+            exact: /order
+      route:
+        - destination:
+            host: order
+            subset: v1
+          weight: 90 # v1 with percentage 90%
+        - destination:
+            host: order
+            subset: v2
+          weight: 10 # v2 with percentage 10%
